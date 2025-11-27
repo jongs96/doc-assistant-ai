@@ -43,33 +43,64 @@ const getTempFilePath = (ext) => {
 const extractTextFromHwp = (base64Data) => {
   return new Promise(async (resolve, reject) => {
     const inputPath = getTempFilePath('hwp');
-    const outputPath = getTempFilePath('txt');
+    const outputPath = getTempFilePath('html');
 
     try {
       const buffer = Buffer.from(base64Data, 'base64');
       await fsPromises.writeFile(inputPath, buffer);
 
-      // Use hwp5txt command directly (installed via pip)
-      const command = `hwp5txt --output "${outputPath}" "${inputPath}"`;
+      // Use hwp5html to convert to HTML (preserves table structure)
+      const command = `hwp5html --output "${outputPath}" "${inputPath}"`;
 
-      console.log(`[Server] Extracting HWP text: ${command}`);
+      console.log(`[Server] Converting HWP to HTML: ${command}`);
 
       exec(command, { timeout: 30000 }, async (error, stdout, stderr) => {
         // Cleanup input
         await fsPromises.unlink(inputPath).catch(() => { });
 
         if (error) {
-          console.error("[Server] hwp5txt Error:", error);
+          console.error("[Server] hwp5html Error:", error);
           console.error("[Server] Stderr:", stderr);
-          return reject(new Error(`HWP 텍스트 추출 실패 (pyhwp 오류): ${stderr || error.message}`));
+          return reject(new Error(`HWP 변환 실패 (pyhwp 오류): ${stderr || error.message}`));
         }
 
         if (fs.existsSync(outputPath)) {
-          const text = await fsPromises.readFile(outputPath, 'utf-8');
-          await fsPromises.unlink(outputPath).catch(() => { });
-          resolve(text);
+          let html = '';
+          try {
+            const stats = await fsPromises.stat(outputPath);
+
+            if (stats.isDirectory()) {
+              // hwp5html creates a directory containing index.xhtml and images
+              const files = await fsPromises.readdir(outputPath);
+              const htmlFile = files.find(f => f.endsWith('.xhtml') || f.endsWith('.html'));
+
+              if (htmlFile) {
+                html = await fsPromises.readFile(path.join(outputPath, htmlFile), 'utf-8');
+              }
+
+              // Cleanup output directory
+              await fsPromises.rm(outputPath, { recursive: true, force: true }).catch(() => { });
+            } else {
+              // Fallback if it created a single file
+              html = await fsPromises.readFile(outputPath, 'utf-8');
+              await fsPromises.unlink(outputPath).catch(() => { });
+            }
+
+            // Clean HTML: Remove images (both base64 and external links) to save tokens
+            html = html.replace(/<img[^>]*>/gi, '[Image Removed]');
+
+            console.log(`[Server] HWP Extracted HTML Preview (First 200 chars): ${html.substring(0, 200)}`);
+
+            if (!html || html.trim().length === 0) {
+              console.warn("[Server] Warning: Extracted HWP HTML is empty.");
+            }
+
+            resolve(html);
+          } catch (readErr) {
+            reject(new Error(`HWP 결과 읽기 실패: ${readErr.message}`));
+          }
         } else {
-          reject(new Error("HWP 텍스트 추출 결과 파일이 없습니다."));
+          reject(new Error("HWP 변환 결과 파일이 없습니다."));
         }
       });
     } catch (err) {
