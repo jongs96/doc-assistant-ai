@@ -18,7 +18,7 @@ Google Gemini AI를 활용하여 문서를 분석하고, 사용자가 취해야 
 
 ---
 
-## 🛠️ 기술 스택 (Tech Stack)
+## ※ 기술 스택 (Tech Stack)
 
 ### **Frontend**
 *   **Framework**: React (Vite)
@@ -40,7 +40,7 @@ Google Gemini AI를 활용하여 문서를 분석하고, 사용자가 취해야 
 *   **Cloud**: Google Cloud Run (Serverless)
 *   **CI/CD**: Google Cloud Build
 
-## 💡 주요 기능 (Key Features)
+## 주요 기능 (Key Features)
 
 1.  **모든 공공 문서 분석 (All-in-One Analysis)**
     *   **HWP(한글)**, PDF, DOCX, 이미지(JPG/PNG) 등 포맷에 상관없이 업로드 가능.
