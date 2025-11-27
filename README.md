@@ -18,19 +18,42 @@ Google Gemini AI를 활용하여 문서를 분석하고, 사용자가 취해야 
 
 ---
 
-## ※ 기술 스택 (Tech Stack)
+## 🛠️ 기술 스택 (Tech Stack)
 
-### Frontend
-*   **React**: 최신 리액트 기능을 활용한 사용자 인터페이스 구축
-*   **TypeScript**: 정적 타입 시스템을 통한 안정적인 코드 작성
-*   **Vite**: 빠르고 가벼운 빌드 도구
-*   **Tailwind CSS** (Optional): 스타일링 (프로젝트 설정에 따라 다름)
+### **Frontend**
+*   **Framework**: React (Vite)
+*   **Language**: TypeScript
+*   **Styling**: Tailwind CSS (Responsive Design)
+*   **Icons**: Lucide React
 
-### Backend
-*   **Node.js & Express**: 가볍고 유연한 백엔드 서버 구축
-*   **Google Gemini API (gemini-2.5-flash)**: 고성능 AI 모델을 이용한 문서 분석 및 챗봇 구현
-*   **pyhwp**: HWP 파일 텍스트 추출 (Python 라이브러리)
-*   **mammoth**: DOCX 파일 텍스트 추출 (Node.js 라이브러리)
+### **Backend**
+*   **Runtime**: Node.js (Express)
+*   **AI Model**: **Google Gemini 2.5 Flash** (Multimodal Analysis)
+*   **HWP Processing**: 
+    *   **Python (`pyhwp`)**: `hwp5html`을 사용하여 HWP 파일을 **HTML로 변환**, 표(Table) 구조를 완벽하게 보존하여 분석 정확도 극대화.
+    *   **Hybrid Architecture**: Node.js 서버에서 Python 프로세스를 제어하는 하이브리드 구조.
+*   **DOCX Processing**: `mammoth.js`
+*   **Search Grounding**: Google Search를 통해 문서에 없는 정보(관할 부서, 최신 규정 등)를 실시간으로 보완 및 검증.
+
+### **Deployment**
+*   **Container**: Docker (Node.js 20-slim + Python 3 + pyhwp)
+*   **Cloud**: Google Cloud Run (Serverless)
+*   **CI/CD**: Google Cloud Build
+
+## 💡 주요 기능 (Key Features)
+
+1.  **모든 공공 문서 분석 (All-in-One Analysis)**
+    *   **HWP(한글)**, PDF, DOCX, 이미지(JPG/PNG) 등 포맷에 상관없이 업로드 가능.
+    *   특히 난해한 **HWP 표 데이터**를 구조적으로 인식하여 정확한 납부 금액과 기한을 추출.
+
+2.  **핵심 행동 요약 (Actionable Insights)**
+    *   "그래서 내가 뭘 해야 해?"에 대한 명확한 답을 제시.
+    *   **납부 기한**, **금액**, **입금 계좌**, **담당 부서**를 카드 형태로 시각화.
+    *   긴급한 고지서(독촉장 등)는 '긴급(Urgent)' 태그로 경고.
+
+3.  **지능형 팩트 체크 (RAG & Grounding)**
+    *   문서 내용을 최우선으로 하되, 문서에 없는 정보는 **신뢰할 수 있는 출처(공공기관 등)**를 검색하여 보완.
+    *   할루시네이션(거짓 정보) 방지를 위해 검색 결과가 없으면 솔직하게 "정보 없음"을 안내.
 
 ---
 
